@@ -105,4 +105,25 @@ MSDN对于 Volatile 有更易懂的[说明](https://learn.microsoft.com/en-us/do
 |x = 1;	|int y2 = Volatile.Read(ref y);|
 |Volatile.Write(ref y, 1); |	int x2 = x;|
 
+x, y 初始化都为0， 保证了如果: y2 = 1; 那么 x = 1 是肯定的，而不会发生 y2 = 1, x = 0; 那也意味着如果 y2 = 0;那么x2 = 0; 不会发生y2 = 0，x2 = 1;
 
+原文是：
+> The volatile read and write prevent reordering of the two operations within each thread, such as by the compiler or by the processor. Regardless of the order in which these operations actually occur on one thread relative to the other thread, even on a multiprocessor system where the threads may run on different processors, the volatile operations guarantee that thread 2 would not see y2 == 1 and x2 == 0. On thread 1 the write to x must appear to occur before the volatile write to y, and on thread 2 the read of x must appear to occur after the volatile read of y. So if thread 2 sees y2 == 1, it must also see x2 == 1.
+
+这个可以理解， 但是接下来就蒙了：
+
+相同情况下并确定了顺序：
+
+|Sequence|Thread 1 |	Thread 2 |
+|:---:|:---:|:---:|
+|1|x = 1;	|...|
+|2|Volatile.Write(ref y, 1); |...|
+|3|...|int y2 = Volatile.Read(ref y);|
+|4|...|int x2 = x;|
+
+原文：
+> Even though the volatile write to y on thread 1 occurred before the volatile read of y on thread 2, thread 2 may still see y2 == 0. The volatile write to y does not guarantee that a following volatile read of y on a different processor will see the updated value.
+
+这里又说 在不同处理器上读取 y2 有可能是0 ... 前面明明说是即使在不同处理器上...
+
+所以不同处理器到底是咋样，，我没理解错吧...
